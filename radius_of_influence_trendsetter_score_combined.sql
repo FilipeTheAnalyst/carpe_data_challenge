@@ -42,7 +42,8 @@ TrendsetterScores AS (
 TrendsetterScoresFinal AS (
 SELECT
     ts.trendsetter_id,
-    ts.num_people_visited + ts.num_distinct_locations AS trendsetter_score
+    ts.num_people_visited + ts.num_distinct_locations AS trendsetter_score,
+    DENSE_RANK() OVER(ORDER BY ts.num_people_visited + ts.num_distinct_locations DESC) as trendsetter_score_rank
 FROM
     TrendsetterScores ts
 ORDER BY
@@ -62,6 +63,10 @@ SELECT
         WHEN tsf.trendsetter_score is null then 0
         ELSE tsf.trendsetter_score
     END as trendsetter_score,
+    CASE
+        WHEN tsf.trendsetter_score_rank is null then (SELECT MAX(tsf.trendsetter_score_rank) + 1 FROM TrendsetterScoresFinal tsf)
+        ELSE tsf.trendsetter_score_rank
+    END as trendsetter_score_rank,
     SQRT(ri.radius_squared) AS radius_of_influence
 FROM
     RadiusOfInfluence ri
