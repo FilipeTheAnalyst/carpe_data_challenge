@@ -47,10 +47,11 @@ TrendsetterScores AS (
 )
 SELECT
     ts.trendsetter_id,
-    ts.num_people_visited + ts.num_distinct_locations AS trendsetter_score
+    ts.num_people_visited + ts.num_distinct_locations AS trendsetter_score,
+    DENSE_RANK() OVER(ORDER BY ts.num_people_visited + ts.num_distinct_locations DESC) as trendsetter_score_rank
 FROM
     TrendsetterScores ts
+QUALIFY DENSE_RANK() OVER(ORDER BY ts.num_people_visited + ts.num_distinct_locations DESC) <= 10
 ORDER BY
     trendsetter_score DESC
-LIMIT
-    10;
+;
